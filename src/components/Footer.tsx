@@ -27,7 +27,7 @@ export function Footer() {
             </Link>
           </div>
           <p className="text-[#6a8a5c] text-base font-normal leading-normal">
-            © 2024 Alwahdi. All rights reserved.
+            © 2025 Alwahdi. All rights reserved.
           </p>
         </div>
       </div>
