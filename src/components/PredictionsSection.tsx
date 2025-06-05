@@ -1,4 +1,5 @@
 // components/PredictionsSection.tsx
+"use client";
 import React from "react";
 import { Button } from "@/components/ui/button"; // Assuming you have shadcn ui button component
 
