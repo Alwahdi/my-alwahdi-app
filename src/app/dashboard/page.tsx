@@ -38,7 +38,7 @@ export default function Dashboard() {
               buttonText="View Details" // Still pass buttonText
               detailsPageUrl={predictionData.detailsPageUrl} // Pass the URL
             />
-            <InteractiveMap mapImageUrl={mapData.mapImageUrl} />
+            <InteractiveMap />
           </div>
         </main>
       </div>
