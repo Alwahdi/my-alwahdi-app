@@ -1,10 +1,16 @@
 // app/dashboard/page.tsx
+import dynamic from "next/dynamic";
 import AiChat from "@/components/AiChat";
 import MainHeader from "@/components/MainHeader";
 import Overview from "@/components/OverView";
 import RecentAnalysis from "@/components/RecentAnalysis";
-import PredictionsSection from "@/components/PredictionsSection"; // This is now a Client Component
-import InteractiveMap from "@/components/InteractiveMap";
+import PredictionsSection from "@/components/PredictionsSection";
+import { Footer } from "@/components/Footer";
+
+// استيراد InteractiveMap ديناميكياً مع تعطيل SSR
+const InteractiveMap = dynamic(() => import("@/components/InteractiveMap"), {
+  ssr: false,
+});
 
 export default function Dashboard() {
   const predictionData = {
@@ -13,8 +19,7 @@ export default function Dashboard() {
       "AI predicts a slight decrease in groundwater levels over the next three months, influenced by seasonal changes and rainfall patterns.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDsZl1_4ASObsb3XCE26dgyqW_HEGbkao-7wnrC1EbIbapmiZjjjL9z55dZJRRxRZaEvVlRl9UoXfdypKgiXBtspnUcDwa4MrScYCgZ4cJvnB-aqxN7KNjGtrdVaPJFAXEeEx9A7ljnZyJ0M36VYAflqiog3lqfxoP6zeRI0wvzdjuLBbBWQrHY-8b8gD2GakGF6xAbBhjpCZQXXpJEKp00OOnoe09v16DGvUzaYqA7rwGt_JH6auHDktO77G2kFLxZHDCTXdYftmMR",
-    // Instead of a function, pass a URL or a simple boolean if the button action is internal
-    detailsPageUrl: "/some-details-page", // Example URL for a dedicated details page
+    detailsPageUrl: "/some-details-page",
   };
 
   const mapData = {
@@ -35,10 +40,12 @@ export default function Dashboard() {
               title={predictionData.title}
               description={predictionData.description}
               imageUrl={predictionData.imageUrl}
-              buttonText="View Details" // Still pass buttonText
-              detailsPageUrl={predictionData.detailsPageUrl} // Pass the URL
+              buttonText="View Details"
+              detailsPageUrl={predictionData.detailsPageUrl}
             />
+            {/* تمرير mapImageUrl كمُلكية لـ InteractiveMap إذا تحتاج */}
             <InteractiveMap />
+            <Footer />
           </div>
         </main>
       </div>
