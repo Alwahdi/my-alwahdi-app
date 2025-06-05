@@ -1,0 +1,75 @@
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(request: NextRequest) {
+  try {
+    const { prompt } = await request.json();
+
+    if (!prompt || typeof prompt !== "string") {
+      return NextResponse.json({ error: "Prompt is required and must be a string" }, { status: 400 });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return NextResponse.json({ error: "API key not configured" }, { status: 500 });
+    }
+
+    // Define the system instruction or initial context for the AI
+    const systemInstruction = "You are an expert GIS (Geographic Information Systems) specialist with profound knowledge in hydrology, specifically focusing on water resources, groundwater dynamics, aquifer systems, water quality, and sustainable water management. Your responses should be precise, data-driven, and technically accurate, providing insights relevant to a professional in the field.";
+
+    // Prepare the body for Gemini 2.0 flash
+    const body = {
+      // Option 1: Use system_instruction (if supported by your specific API version)
+      // system_instruction: {
+      //   parts: [{ text: systemInstruction }]
+      // },
+      contents: [
+        // Option 2: Add a priming message as the first turn of the conversation (more widely supported)
+        {
+          role: "user",
+          parts: [{ text: systemInstruction }]
+        },
+        {
+          role: "model",
+          parts: [{ text: "Understood. I am ready to assist with any questions regarding GIS, water resources, and groundwater analysis." }]
+        },
+        // The actual user prompt follows these initial context-setting messages
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
+    };
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Gemini API error:", res.status, errorText); // Log error for debugging
+      return NextResponse.json({ error: `Gemini API error: ${errorText}` }, { status: res.status });
+    }
+
+    const data = await res.json();
+    console.log("Gemini API response:", data); // Log response for debugging
+
+    // Adjust according to the exact response structure from Gemini API docs for generateContent
+    // For generateContent, the response is typically data.candidates[0].content.parts[0].text
+    const reply =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No reply from Gemini";
+
+    return NextResponse.json({ reply });
+  } catch (error: any) {
+    console.error("Server error:", error); // Log server-side errors
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+  }
+}

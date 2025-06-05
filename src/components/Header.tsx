@@ -66,7 +66,7 @@ export function Header() {
                 className="bg-[#539932] text-[#fafbf9] text-sm font-bold tracking-[0.015em] h-10 px-4 hover:bg-[#4a8a2b] mt-2"
                 onClick={() => setIsOpen(false)}
               >
-                Dashboard
+                <Link href="/dashboard">Dashboard</Link>
               </Button>
             </SignedIn>
           </div>
@@ -109,7 +109,7 @@ export function Header() {
                 className="bg-[#539932] text-[#fafbf9] text-sm font-bold tracking-[0.015em] h-10 px-4 hover:bg-[#4a8a2b] mt-2"
                 onClick={() => setIsOpen(false)}
               >
-                Dashboard
+                <Link href="/dashboard">Dashboard</Link>
               </Button>
             </SignedIn>
           </div>

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -25,7 +26,7 @@ export function HeroSection() {
           </div>
           <SignedIn>
             <Button className="bg-[#539932] text-[#fafbf9] text-sm font-bold leading-normal tracking-[0.015em] h-10 px-4 hover:bg-[#4a8a2b]">
-              Dashboard
+              <Link href="/dashboard">Dashboard </Link>
             </Button>
           </SignedIn>
           <SignedOut>
