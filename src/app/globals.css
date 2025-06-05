@@ -76,6 +76,17 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+      /* Custom color definitions from your design */
+      --primary-green: 104 43% 40%; /* HSL values for #539932 */
+      --light-green: 88 23% 94%;   /* HSL values for #ecf1ea */
+      --dark-green: 96 15% 7%;     /* HSL values for #131810 */
+      --text-green: 96 15% 45%;    /* HSL values for #6a8a5c */
+      --border-green: 96 15% 85%;  /* HSL values for #d9e2d4 */
+      --bg-light: 96 15% 98%;      /* HSL values for #fafbf9 */
+
+      --checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(250,251,249)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e');
+
 }
 
 .dark {

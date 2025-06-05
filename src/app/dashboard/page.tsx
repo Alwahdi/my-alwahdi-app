@@ -1,5 +1,6 @@
 import MainHeader from "@/components/MainHeader";
 import DashboardClient from "./DashboardClient";
+import { Footer } from "@/components/Footer";
 
 export default function Dashboard() {
   return (
@@ -9,6 +10,7 @@ export default function Dashboard() {
         <main className="px-40 flex flex-1 justify-center py-5">
           <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
             <DashboardClient />
+            <Footer />
           </div>
         </main>
       </div>
