@@ -1,5 +1,7 @@
-// src/components/BenefitsSection.tsx
+"use client";
+
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 interface Benefit {
   imageUrl: string;
@@ -37,39 +39,55 @@ const benefits: Benefit[] = [
 
 export function BenefitsSection() {
   return (
-    <div className="flex flex-col gap-10 px-4 py-10 @container">
-      <div className="flex flex-col gap-4">
-        <h1 className="text-[#131810] tracking-light text-[32px] font-bold leading-tight @[480px]:text-4xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em] max-w-[720px]">
+    <section className="flex flex-col gap-10 px-4 py-16 @container">
+      {/* Section Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="flex flex-col gap-4"
+      >
+        <h1 className="text-[#131810] tracking-tight text-[32px] font-bold leading-tight @[480px]:text-4xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em] max-w-[720px]">
           Benefits
         </h1>
         <p className="text-[#131810] text-base font-normal leading-normal max-w-[720px]">
           Discover how Alwahdi can help you achieve sustainable groundwater
           management.
         </p>
-      </div>
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-3">
+      </motion.div>
+
+      {/* Benefits Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {benefits.map((benefit, index) => (
-          <div key={index} className="flex flex-col gap-3 pb-3">
-            {/* Using Next.js Image component for performance */}
+          <motion.div
+            key={index}
+            className="flex flex-col gap-4 pb-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            viewport={{ once: true }}
+          >
             <Image
               src={benefit.imageUrl}
               alt={benefit.altText}
-              width={300} // Set appropriate default width for better LCP
-              height={168} // Set appropriate default height (aspect-video is 16:9)
-              className="w-full aspect-video object-cover rounded-lg"
-              sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 300px" // Responsive sizes
+              width={300}
+              height={168}
+              className="w-full aspect-video object-cover rounded-t-lg"
+              sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 300px"
+              priority={index === 0} // Improve LCP on first image
             />
-            <div>
-              <p className="text-[#131810] text-base font-medium leading-normal">
+            <div className="px-4">
+              <h3 className="text-[#131810] text-lg font-semibold leading-snug">
                 {benefit.title}
-              </p>
-              <p className="text-[#6a8a5c] text-sm font-normal leading-normal">
+              </h3>
+              <p className="text-[#6a8a5c] text-sm font-normal leading-normal mt-1">
                 {benefit.description}
               </p>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
