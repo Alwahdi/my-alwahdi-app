@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 
 export function HeroSection() {
   return (
@@ -22,9 +23,16 @@ export function HeroSection() {
               management.
             </h2>
           </div>
-          <Button className="bg-[#539932] text-[#fafbf9] text-sm font-bold leading-normal tracking-[0.015em] h-10 px-4 hover:bg-[#4a8a2b]">
-            Get Started
-          </Button>
+          <SignedIn>
+            <Button className="bg-[#539932] text-[#fafbf9] text-sm font-bold leading-normal tracking-[0.015em] h-10 px-4 hover:bg-[#4a8a2b]">
+              Dashboard
+            </Button>
+          </SignedIn>
+          <SignedOut>
+            <Button className="bg-[#539932] text-[#fafbf9] text-sm font-bold leading-normal tracking-[0.015em] h-10 px-4 hover:bg-[#4a8a2b]">
+              <SignInButton />
+            </Button>
+          </SignedOut>
         </div>
       </div>
     </div>

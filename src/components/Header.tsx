@@ -101,7 +101,6 @@ export function Header() {
                 className="bg-[#539932] text-[#fafbf9] text-sm font-bold tracking-[0.015em] h-10 px-4 hover:bg-[#4a8a2b] mt-2"
                 onClick={() => setIsOpen(false)}
               >
-                Get Started
                 <SignInButton />
               </Button>
             </SignedOut>
