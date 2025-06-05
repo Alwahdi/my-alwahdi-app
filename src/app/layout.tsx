@@ -1,7 +1,9 @@
 // src/app/layout.tsx
+
 import type { Metadata } from "next";
 import { Noto_Sans, Public_Sans } from "next/font/google"; // Import the fonts
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
 
 // Configure your fonts with desired weights and subsets
 const publicSans = Public_Sans({
@@ -30,11 +32,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      {/* Apply font CSS variables to the body. publicSans.variable applies --font-public-sans, etc. */}
-      <body className={`${publicSans.variable} ${notoSans.variable}`}>
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        {/* Apply font CSS variables to the body. publicSans.variable applies --font-public-sans, etc. */}
+        <body className={`${publicSans.variable} ${notoSans.variable}`}>
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
