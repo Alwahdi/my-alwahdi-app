@@ -48,17 +48,15 @@ export default function MainHeader() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#131810]">
-            {["Dashboard", "Analysis", "Prediction", "Reports", "Settings"].map(
-              (item) => (
-                <Link
-                  key={item}
-                  href={`/${item.toLowerCase()}`}
-                  className="hover:text-gray-700 transition-colors duration-200"
-                >
-                  {item}
-                </Link>
-              )
-            )}
+            {["Dashboard", "Map", "Data", "Reports", "Settings"].map((item) => (
+              <Link
+                key={item}
+                href={`/${item.toLowerCase()}`}
+                className="hover:text-gray-700 transition-colors duration-200"
+              >
+                {item}
+              </Link>
+            ))}
           </nav>
 
           {/* User Buttons/Auth - Desktop */}

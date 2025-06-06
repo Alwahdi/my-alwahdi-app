@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"; // Shadcn Input
 
 import { useMapStore } from "@/store/map-store";
 import { cn } from "@/lib/utils"; // Import cn utility for conditional class merging
+import MainHeader from "@/components/MainHeader";
 
 // Dynamically import the map component to ensure it's client-side only
 const DynamicMap = dynamic(
@@ -149,6 +150,7 @@ export default function Home() {
       }}
     >
       <div className="layout-container flex h-full grow flex-col">
+        <MainHeader />
         {/* Mobile Header with Hamburger Menu */}
         <div className="md:hidden flex items-center justify-between px-6 py-4 bg-[#fafbf9] border-b border-[#d9e2d4]">
           <h1 className="text-[#131810] text-lg font-bold">GIS App</h1>
