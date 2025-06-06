@@ -1,8 +1,9 @@
-"use client"; // for Next.js App Router client component
+"use client"; // Marks this component as a client component for Next.js App Router
 
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Loader2 } from "lucide-react"; // Importing icons for send and loading states
 
+// Define the shape of a message object
 interface Message {
   id: number;
   text: string;
@@ -10,41 +11,58 @@ interface Message {
 }
 
 export default function AiChat() {
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null); // Ref for textarea for auto-resize
+  // State variables for managing chat functionality
+  const [input, setInput] = useState(""); // Stores the current input text
+  const [messages, setMessages] = useState<Message[]>([]); // Stores all chat messages
+  const [loading, setLoading] = useState(false); // Indicates if an AI response is being fetched
+  const [error, setError] = useState<string | null>(null); // Stores any error messages
 
+  // Refs for DOM manipulation
+  // Ref for the main scrollable chat container
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  // Ref for auto-resizing textarea
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  /**
+   * Handles sending a message to the AI.
+   * - Adds user message to the chat.
+   * - Clears the input field.
+   * - Calls the `/api/chat` endpoint to get an AI response.
+   * - Adds the AI response (or error) to the chat.
+   * - Manages loading and error states.
+   */
   async function sendMessage() {
     if (!input.trim() || loading) return; // Prevent sending empty messages or multiple messages while loading
 
+    // Create and add the user's message to the state
     const userMessage = {
       id: Date.now(),
       text: input,
       sender: "user" as const,
     };
     setMessages((msgs) => [...msgs, userMessage]);
-    setInput(""); // Clear input immediately
-    setLoading(true);
-    setError(null);
+    setInput(""); // Clear input immediately for a responsive feel
+    setLoading(true); // Set loading state to true
+    setError(null); // Clear any previous errors
 
     try {
+      // Fetch AI response from the backend API
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: userMessage.text }), // Use userMessage.text to ensure latest input is sent
+        body: JSON.stringify({ prompt: userMessage.text }), // Send user's message as prompt
       });
 
+      // Handle non-OK HTTP responses
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || "Failed to fetch AI response");
       }
 
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      if (data.error) throw new Error(data.error); // Handle API-specific errors
 
+      // Create and add the AI's message to the state
       const aiMessage = {
         id: Date.now() + 1,
         text: data.reply,
@@ -52,10 +70,11 @@ export default function AiChat() {
       };
       setMessages((msgs) => [...msgs, aiMessage]);
     } catch (err: any) {
+      // Catch and display any errors during the fetch process
       setError(err.message || "An unknown error occurred.");
     } finally {
-      setLoading(false);
-      // Auto-resize textarea after response
+      setLoading(false); // Reset loading state
+      // After response, ensure textarea height is correct
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
         textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
@@ -63,37 +82,72 @@ export default function AiChat() {
     }
   }
 
+  /**
+   * Handles keyboard events for the textarea.
+   * - Sends message on 'Enter' key press (without Shift).
+   */
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+      e.preventDefault(); // Prevent new line in textarea
+      sendMessage(); // Send the message
     }
   }
 
-  // Effect to scroll to bottom on new messages
+  /**
+   * Effect hook to scroll to the bottom of the chat.
+   * This effect now directly sets the `scrollTop` of the chat container
+   * to its maximum scrollable height, ensuring it's always at the very bottom.
+   * It uses `setTimeout(0)` to ensure the DOM has fully updated.
+   */
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]); // Also scroll when loading state changes (for loader)
+    // Only attempt to scroll if the last message is from the AI
+    // or if a user message was just sent and the loader appeared (optional, but good for UX)
+    if (messages.length > 0) {
+      const lastMessageSender = messages[messages.length - 1].sender;
 
-  // Effect to auto-resize textarea
+      // Only scroll when an AI message is added, or a user message is added and loading starts
+      if (
+        lastMessageSender === "ai" ||
+        (lastMessageSender === "user" && loading)
+      ) {
+        if (chatContainerRef.current) {
+          // Use setTimeout with 0ms to defer scroll until after DOM update
+          setTimeout(() => {
+            chatContainerRef.current!.scrollTop =
+              chatContainerRef.current!.scrollHeight;
+          }, 0);
+        }
+      }
+    }
+  }, [messages, loading]); // Depend on both messages and loading state
+
+  /**
+   * Effect hook to auto-resize the textarea based on its content.
+   * This provides a better user experience by expanding the input field as text is typed.
+   */
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+      textareaRef.current.style.height = "auto"; // Reset height to recalculate
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Set to scroll height
     }
-  }, [input]); // Re-adjust height whenever input changes
+  }, [input]); // Dependency array: Re-run whenever 'input' state changes
 
   return (
     <div className="flex flex-col h-[70vh] max-h-[800px] min-h-[500px] w-full max-w-[960px] mx-auto bg-[#fafbf9] rounded-xl shadow-lg border border-[#ecf0ea] overflow-hidden">
-      {/* Title */}
+      {/* Chat Title */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-[#ecf0ea]">
         <h2 className="text-[#131811] text-xl font-bold leading-tight">
           AI Chat Assistant
         </h2>
       </div>
 
-      {/* Chat messages display area */}
-      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+      {/* Chat Messages Display Area */}
+      {/* Assign the chatContainerRef here */}
+      <div
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto p-4 custom-scrollbar"
+      >
+        {/* Initial prompt message when no messages are present */}
         {messages.length === 0 && !loading && !error && (
           <div className="flex items-center justify-center h-full text-center text-[#6c8560] italic text-base px-4">
             <p>
@@ -103,6 +157,7 @@ export default function AiChat() {
           </div>
         )}
 
+        {/* Container for individual messages */}
         <div className="flex flex-col gap-4">
           {messages.map(({ id, text, sender }) => (
             <div
@@ -115,8 +170,8 @@ export default function AiChat() {
                 className={`rounded-2xl px-4 py-2 max-w-[85%] sm:max-w-[70%] whitespace-pre-wrap break-words text-sm md:text-base font-normal leading-normal shadow-sm
                   ${
                     sender === "user"
-                      ? "bg-[#70b450] text-white rounded-br-none" // User messages
-                      : "bg-[#d9e1d6] text-[#131811] rounded-bl-none" // AI messages
+                      ? "bg-[#70b450] text-white rounded-br-none" // Styling for user messages
+                      : "bg-[#d9e1d6] text-[#131811] rounded-bl-none" // Styling for AI messages
                   }
                 `}
               >
@@ -125,6 +180,7 @@ export default function AiChat() {
             </div>
           ))}
 
+          {/* Loading indicator for AI response */}
           {loading && (
             <div className="flex justify-start">
               <div className="bg-[#d9e1d6] text-[#131811] rounded-2xl rounded-bl-none px-4 py-2 max-w-[85%] sm:max-w-[70%] text-sm md:text-base shadow-sm">
@@ -133,19 +189,18 @@ export default function AiChat() {
               </div>
             </div>
           )}
-
-          <div ref={messagesEndRef} />
+          {/* Removed messagesEndRef as we are now scrolling the container directly */}
         </div>
       </div>
 
-      {/* Error display */}
+      {/* Error display area */}
       {error && (
         <div className="bg-red-100 text-red-700 px-4 py-2 text-center text-sm border-t border-red-200">
           Error: {error}
         </div>
       )}
 
-      {/* Input area */}
+      {/* Message Input Area */}
       <div className="relative p-4 border-t border-[#ecf0ea] flex items-end bg-white">
         <textarea
           ref={textareaRef}
@@ -154,8 +209,8 @@ export default function AiChat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={loading}
-          rows={1} // Start with 1 row and let JS adjust
+          disabled={loading} // Disable input when loading
+          rows={1} // Start with 1 row, auto-resize will adjust
         ></textarea>
         <button
           onClick={sendMessage}
@@ -164,9 +219,9 @@ export default function AiChat() {
           aria-label="Send message"
         >
           {loading ? (
-            <Loader2 className="animate-spin size-4" />
+            <Loader2 className="animate-spin size-4" /> // Show loader icon when loading
           ) : (
-            <Send className="size-4" />
+            <Send className="size-4" /> // Show send icon when not loading
           )}
         </button>
       </div>

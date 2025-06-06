@@ -5,7 +5,7 @@ import {
   MapContainer,
   TileLayer,
   Marker,
-  Popup,
+  Popup, // Make sure Popup is imported
   GeoJSON,
   useMap,
 } from "react-leaflet";
@@ -37,7 +37,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-// Define map providers
+// Define map providers with their names, URLs, and attributions
 const mapProviders = {
   osm: {
     name: "OpenStreetMap",
@@ -51,17 +51,17 @@ const mapProviders = {
   },
   google: {
     name: "Google Maps",
-    url: "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+    url: "http://{s}.google.com/vt/lyrs=m&x={x}&y={y}/{z}/", // Note: sometimes Google uses /lyrs=m&x={x}&y={y}&z={z}
     attribution: "Map data &copy; Google",
   },
 };
 
-// RecenterMap component
+// Component to recenter the map programmatically
 function RecenterMap({ center }: { center: [number, number] }) {
   const map = useMap();
   useEffect(() => {
     map.setView(center);
-  }, [center]);
+  }, [center, map]);
   return null;
 }
 
@@ -73,16 +73,16 @@ const InteractiveMap = () => {
   const [selectedFeature, setSelectedFeature] = useState<any | null>(null);
   const [showGroundwaterWells, setShowGroundwaterWells] = useState(true);
   const [showRainfallZones, setShowRainfallZones] = useState(true);
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<any>(null); // This ref is not actively used in the current setup but can be useful.
 
-  // Style for polygons
+  // Style for polygons (rainfall zones)
   const styleGeoJson = {
     color: "blue",
     weight: 2,
     fillOpacity: 0.1,
   };
 
-  // Point to Layer for wells
+  // Custom icon for groundwater wells
   const pointToLayer = (feature: any, latlng: L.LatLng) => {
     const quality = feature.properties.quality || "good";
     const iconUrl =
@@ -91,29 +91,61 @@ const InteractiveMap = () => {
       iconUrl,
       iconSize: [32, 32],
       iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
+      popupAnchor: [0, -32], // Correctly positions the popup relative to the icon
     });
     return L.marker(latlng, { icon });
   };
 
-  // OnEachFeature handler
+  // OnEachFeature handler for both wells and rainfall zones
   const onEachFeature = (feature: any, layer: L.Layer) => {
+    // Determine coordinates for recentering
+    const coords: [number, number] =
+      feature.geometry.type === "Point"
+        ? [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]
+        : [
+            feature.geometry.coordinates[0][0][1],
+            feature.geometry.coordinates[0][0][0],
+          ];
+
+    // Create popup content based on feature properties
+    let popupContent = `
+      <div>
+        <strong>${
+          feature.properties?.name || feature.properties?.id || "No Name"
+        }</strong><br/>
+    `;
+
+    if (feature.properties?.level)
+      popupContent += `المستوى: ${feature.properties.level}<br/>`;
+    if (feature.properties?.quality)
+      popupContent += `الجودة: ${feature.properties.quality}<br/>`;
+    if (feature.properties?.risk)
+      popupContent += `المخاطر: ${feature.properties.risk}<br/>`;
+    if (feature.properties?.last_measured)
+      popupContent += `آخر قياس: ${feature.properties.last_measured}<br/>`;
+    if (feature.properties?.rainfall_mm)
+      popupContent += `معدل الأمطار: ${feature.properties.rainfall_mm} ملم<br/>`;
+    if (feature.properties?.month)
+      popupContent += `الشهر: ${feature.properties.month}<br/>`;
+    if (feature.properties?.description)
+      popupContent += `<small>${feature.properties.description}</small>`;
+    if (feature.properties?.notes)
+      popupContent += `<small>${feature.properties.notes}</small>`;
+
+    popupContent += `</div>`;
+
+    // --- FIX for popup visibility: Bind a Leaflet popup directly to the layer ---
+    layer.bindPopup(popupContent, {
+      className: "custom-map-popup", // Add a custom class for potential additional styling
+      closeButton: false, // Optional: show/hide close button
+      // You can also add specific Leaflet popup options here, e.g., maxWidth, offset
+    });
+
     layer.on("click", () => {
-      setSelectedFeature(feature);
-      const coords =
-        feature.geometry.type === "Point"
-          ? [feature.geometry.coordinates[1], feature.geometry.coordinates[0]]
-          : [
-              feature.geometry.coordinates[0][0][1],
-              feature.geometry.coordinates[0][0][0],
-            ];
-      setMapCenter(coords as [number, number]);
+      setSelectedFeature(feature); // Still set selected feature to open the Sheet
+      setMapCenter(coords); // Recenter the map on click
     });
   };
-
-  useEffect(() => {
-    // Any side effects or map-related logic
-  }, []);
 
   return (
     <div className="relative w-full h-[90vh]">
@@ -122,17 +154,17 @@ const InteractiveMap = () => {
         zoom={12}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
-        whenReady={() => {
-          if (mapRef.current == null && typeof window !== "undefined") {
-            // Access the map instance via leaflet's global L.Map
-            // or use a ref callback on MapContainer if needed
-            // For now, do nothing or set up ref elsewhere if needed
-          }
-        }}
       >
         <TileLayer
           attribution={activeProvider.attribution}
           url={activeProvider.url}
+          subdomains={
+            activeProvider.name === "Google Maps"
+              ? ["mt0", "mt1", "mt2", "mt3"]
+              : activeProvider.name === "OpenStreetMap"
+              ? ["a", "b", "c"]
+              : undefined
+          }
         />
         <RecenterMap center={mapCenter} />
 
@@ -164,7 +196,7 @@ const InteractiveMap = () => {
               {activeProvider.name}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent className="z-[1001]">
             {Object.entries(mapProviders).map(([key, provider]) => (
               <DropdownMenuItem
                 key={key}
@@ -195,7 +227,7 @@ const InteractiveMap = () => {
         </div>
       </div>
 
-      {/* Feature Info Panel */}
+      {/* Feature Info Panel (Sheet component) */}
       {selectedFeature && (
         <Sheet
           open={!!selectedFeature}
@@ -203,10 +235,13 @@ const InteractiveMap = () => {
         >
           <SheetContent side="right">
             <SheetHeader>
-              <SheetTitle>{selectedFeature.properties?.name}</SheetTitle>
+              <SheetTitle>
+                {selectedFeature.properties?.name || "تفاصيل الميزة"}
+              </SheetTitle>
               <SheetDescription>
                 {selectedFeature.properties?.description ||
-                  selectedFeature.properties?.notes}
+                  selectedFeature.properties?.notes ||
+                  "لا يوجد وصف متوفر."}
               </SheetDescription>
             </SheetHeader>
             <Card className="mt-4">

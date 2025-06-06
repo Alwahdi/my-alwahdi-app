@@ -85,18 +85,16 @@ export default function MainHeader() {
         {/* Mobile Menu Dropdown */}
         {isMenuOpen && (
           <div className="mt-4 flex flex-col gap-4 md:hidden animate-slide-down text-sm text-[#131810]">
-            {["Dashboard", "Analysis", "Prediction", "Reports", "Settings"].map(
-              (item) => (
-                <Link
-                  key={item}
-                  href={`/${item.toLowerCase()}`}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="hover:text-gray-700 transition-colors duration-200"
-                >
-                  {item}
-                </Link>
-              )
-            )}
+            {["Dashboard", "Map", "Data", "Reports", "Settings"].map((item) => (
+              <Link
+                key={item}
+                href={`/${item.toLowerCase()}`}
+                onClick={() => setIsMenuOpen(false)}
+                className="hover:text-gray-700 transition-colors duration-200"
+              >
+                {item}
+              </Link>
+            ))}
             <div className="pt-2">
               {" "}
               {/* Added padding for separation */}
