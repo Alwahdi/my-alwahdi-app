@@ -87,18 +87,6 @@ const Overview: React.FC = () => {
           changePositive={true}
         />
         {/* Optional: Add more cards to demonstrate responsiveness */}
-        <MetricCard
-          title="Water Quality Index"
-          value="Good"
-          change="+0.5"
-          changePositive={true}
-        />
-        <MetricCard
-          title="Average Daily Usage"
-          value="5000L"
-          change="-10%"
-          changePositive={false}
-        />
       </div>
     </section>
   );
